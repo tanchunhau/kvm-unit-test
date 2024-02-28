@@ -7,7 +7,9 @@ This document outlines the test scenarios and how individual test cases are impl
 
 Compile:
 -------
-> git clone http://gitlab.starfivetech.com/chunhau.tan/kvm-unit-tests.git -b prototype0
+> git clone https://github.com/tanchunhau/kvm-unit-test.git -b rpmi_test
+>
+> cd kvm-unit-test
 >
 > ./configure
 >
