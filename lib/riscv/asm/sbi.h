@@ -18,6 +18,9 @@ enum sbi_ext_id {
 	SBI_EXT_BASE = 0x10,
 	SBI_EXT_HSM = 0x48534d,
 	SBI_EXT_SRST = 0x53525354,
+	SBI_EXT_SUSP = 0x53555350,
+	SBI_EXT_CPPC = 0x43505043,
+
 };
 
 enum sbi_ext_base_fid {

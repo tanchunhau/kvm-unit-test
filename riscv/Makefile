@@ -15,6 +15,10 @@ tests += $(TEST_DIR)/sbi.$(exe)
 tests += $(TEST_DIR)/selftest.$(exe)
 tests += $(TEST_DIR)/sieve.$(exe)
 
+ifeq (on,$(rpmi))
+include $(TEST_DIR)/rpmi_testsuite/Makefile
+endif
+
 all: $(tests)
 
 $(TEST_DIR)/sieve.elf: AUXFLAGS = 0x1
@@ -77,6 +81,8 @@ CFLAGS += -ffreestanding
 CFLAGS += -O2
 CFLAGS += -I $(SRCDIR)/lib -I $(SRCDIR)/lib/libfdt
 
+export CFLAGS+=-DVAL_VERBOSE_CONFIG=$(VERBOSE)
+
 asm-offsets = lib/riscv/asm-offsets.h
 include $(SRCDIR)/scripts/asm-offsets.mak
 
@@ -105,3 +111,8 @@ $(tests:.$(exe)=.o) $(cstart.o) $(cflatobjs): $(generated-files)
 arch_clean: asm_offsets_clean
 	$(RM) $(TEST_DIR)/*.{o,flat,elf,so,efi,debug} \
 	      $(TEST_DIR)/.*.d $(TEST_DIR)/efi/.*.d lib/riscv/.*.d
+	      
+	$(RM) $(TEST_DIR)/rpmi_testsuite/*.{d,o,flat,elf,so,efi,debug} \
+		  $(TEST_DIR)/rpmi_testsuite/*/*/*.{d,o,flat,elf,so,efi,debug} \
+		  $(TEST_DIR)/rpmi_testsuite/*/*/.*.{d,o,flat,elf,so,efi,debug}
+
