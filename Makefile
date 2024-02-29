@@ -88,7 +88,8 @@ COMMON_CFLAGS += $(wunused_but_set_parameter)
 CFLAGS += $(COMMON_CFLAGS)
 CFLAGS += $(wmissing_parameter_type)
 CFLAGS += $(wold_style_declaration)
-CFLAGS += -Woverride-init -Wmissing-prototypes -Wstrict-prototypes
+#CFLAGS += -Woverride-init -Wmissing-prototypes -Wstrict-prototypes -I /opt/poky/4.0.9/sysroots/riscv64-poky-linux/usr/include
+CFLAGS += -Woverride-init -Wmissing-prototypes -Wstrict-prototypes -I /home/chunhau.tan/power_management/sdk_toolchain/installed/poky/4.0.9/sysroots/riscv64-poky-linux/usr/include
 
 autodepend-flags = -MMD -MP -MF $(dir $*).$(notdir $*).d
 
