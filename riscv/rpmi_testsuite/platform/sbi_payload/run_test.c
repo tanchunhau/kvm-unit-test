@@ -7,7 +7,7 @@
 
 int main(void)
 {
-    val_print(VAL_VERBOSE_INFO, "RPMI Test Suite Version 0.0.1\n\n");
+    val_print(VAL_VERBOSE_INFO, "RPMI Test Suite Version 0.0.2\n\n");
 
     val_print(VAL_VERBOSE_INFO, "\t\t*** Test Initialization ***\n");
 
