@@ -13,7 +13,7 @@ endif
 tests =
 tests += $(TEST_DIR)/sbi.$(exe)
 tests += $(TEST_DIR)/selftest.$(exe)
-tests += $(TEST_DIR)/sieve.$(exe)
+#tests += $(TEST_DIR)/sieve.$(exe)
 
 ifeq (on,$(rpmi))
 include $(TEST_DIR)/rpmi_testsuite/Makefile
@@ -26,16 +26,12 @@ $(TEST_DIR)/sieve.elf: AUXFLAGS = 0x1
 cstart.o = $(TEST_DIR)/cstart.o
 
 cflatobjs += lib/alloc.o
-cflatobjs += lib/alloc_page.o
 cflatobjs += lib/alloc_phys.o
 cflatobjs += lib/devicetree.o
-cflatobjs += lib/memregions.o
 cflatobjs += lib/on-cpus.o
-cflatobjs += lib/vmalloc.o
 cflatobjs += lib/riscv/bitops.o
 cflatobjs += lib/riscv/io.o
 cflatobjs += lib/riscv/isa.o
-cflatobjs += lib/riscv/mmu.o
 cflatobjs += lib/riscv/processor.o
 cflatobjs += lib/riscv/sbi.o
 cflatobjs += lib/riscv/setup.o

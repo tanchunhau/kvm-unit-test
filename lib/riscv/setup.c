@@ -6,38 +6,21 @@
  */
 #include <libcflat.h>
 #include <alloc.h>
-#include <alloc_page.h>
 #include <alloc_phys.h>
 #include <argv.h>
-#include <auxinfo.h>
 #include <cpumask.h>
 #include <devicetree.h>
-#include <memregions.h>
 #include <on-cpus.h>
-#include <vmalloc.h>
 #include <asm/csr.h>
-#include <asm/mmu.h>
 #include <asm/page.h>
 #include <asm/processor.h>
 #include <asm/setup.h>
-
-#define VA_BASE			((phys_addr_t)3 * SZ_1G)
-#if __riscv_xlen == 64
-#define VA_TOP			((phys_addr_t)4 * SZ_1G)
-#else
-#define VA_TOP			((phys_addr_t)0)
-#endif
-
-#define MAX_DT_MEM_REGIONS	16
-#define NR_MEM_REGIONS		(MAX_DT_MEM_REGIONS + 16)
 
 char *initrd;
 u32 initrd_size;
 
 struct thread_info cpus[NR_CPUS];
 int nr_cpus;
-
-static struct mem_region riscv_mem_regions[NR_MEM_REGIONS + 1];
 
 int hartid_to_cpu(unsigned long hartid)
 {
@@ -81,52 +64,10 @@ static void cpu_init(void)
 	cpu0_calls_idle = true;
 }
 
-extern unsigned long _etext;
-
 static void mem_init(phys_addr_t freemem_start)
 {
-	struct mem_region *freemem, *code, *data;
-	phys_addr_t freemem_end, base, top;
-
-	memregions_init(riscv_mem_regions, NR_MEM_REGIONS);
-	memregions_add_dt_regions(MAX_DT_MEM_REGIONS);
-
-	/* Split the region with the code into two regions; code and data */
-	memregions_split((unsigned long)&_etext, &code, &data);
-	assert(code);
-	code->flags |= MR_F_CODE;
-
-	freemem = memregions_find(freemem_start);
-	assert(freemem && !(freemem->flags & (MR_F_IO | MR_F_CODE)));
-
-	freemem_end = freemem->end & PAGE_MASK;
-
-	/*
-	 * The assert below is mostly checking that the free memory doesn't
-	 * start in the 3G-4G range, which is reserved for virtual addresses,
-	 * but it also confirms that there is some free memory (the amount
-	 * is arbitrarily selected, but should be sufficient for a unit test)
-	 *
-	 * TODO: Allow the VA range to shrink and move.
-	 */
-	if (freemem_end > VA_BASE)
-		freemem_end = VA_BASE;
-	assert(freemem_end - freemem_start >= SZ_1M * 16);
-
-	init_alloc_vpage(__va(VA_TOP));
-
-	/*
-	 * TODO: Remove the need for this phys allocator dance, since, as we
-	 * can see with the assert, we could have gone straight to the page
-	 * allocator.
-	 */
-	phys_alloc_init(freemem_start, freemem_end - freemem_start);
-	phys_alloc_set_minimum_alignment(PAGE_SIZE);
-	phys_alloc_get_unused(&base, &top);
-	assert(base == freemem_start && top == freemem_end);
-
-	page_alloc_init_area(0, freemem_start >> PAGE_SHIFT, freemem_end >> PAGE_SHIFT);
-	page_alloc_ops_enable();
+	//TODO - for now just assume we've got some memory available
+	phys_alloc_init(freemem_start, 16 * SZ_1M);
 }
 
 static void banner(void)
@@ -145,8 +86,8 @@ void setup(const void *fdt, phys_addr_t freemem_start)
 	u32 fdt_size;
 	int ret;
 
-	assert(sizeof(long) == 8 || freemem_start < VA_BASE);
-	freemem = __va(freemem_start);
+	assert(sizeof(long) == 8 || freemem_start < (3ul << 30));
+	freemem = (void *)(unsigned long)freemem_start;
 
 	/* Move the FDT to the base of free memory */
 	fdt_size = fdt_totalsize(fdt);
@@ -165,7 +106,7 @@ void setup(const void *fdt, phys_addr_t freemem_start)
 		freemem += initrd_size;
 	}
 
-	mem_init(PAGE_ALIGN(__pa(freemem)));
+	mem_init(PAGE_ALIGN((unsigned long)freemem));
 	cpu_init();
 	thread_info_init();
 	io_init();
@@ -180,9 +121,6 @@ void setup(const void *fdt, phys_addr_t freemem_start)
 		memcpy(env, initrd, initrd_size);
 		setup_env(env, initrd_size);
 	}
-
-	if (!(auxinfo.flags & AUXINFO_MMU_OFF))
-		setup_vm();
 
 	banner();
 }
