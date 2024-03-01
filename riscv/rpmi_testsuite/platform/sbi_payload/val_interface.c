@@ -3,7 +3,7 @@
 
 #define SHMEM_PAGE_SIZE 4096
 
-struct sbi_rpxy g_rpxy;
+static struct sbi_rpxy g_rpxy;
 
 int val_init(void)
 {
